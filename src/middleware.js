@@ -56,8 +56,13 @@ export async function middleware(request) {
     return withRefreshed(NextResponse.redirect(new URL("/", request.url)));
   }
 
-  // Admin-only area
-  if (pathname.startsWith("/admin") && session?.role !== "Admin") {
+  // Admin area: management (Admin + Manager) may view; write actions are
+  // additionally gated server-side so managers stay read-only.
+  if (
+    pathname.startsWith("/admin") &&
+    session?.role !== "Admin" &&
+    session?.role !== "Manager"
+  ) {
     return withRefreshed(NextResponse.redirect(new URL("/", request.url)));
   }
 

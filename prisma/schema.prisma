@@ -7,41 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Project {
-  id      Int    @id @default(autoincrement())
-  name    String
-  email   String
-  project String
-  status  String
-  weeks   String
-  budget  String
-  avatar  String
-}
-
-model Feed {
-  id    Int    @id @default(autoincrement())
-  title String
-  icon  String
-  color String
-  date  String
-}
-
-model Blog {
-  id          Int    @id @default(autoincrement())
-  title       String
-  subtitle    String
-  description String
-  image       String
-  btnbg       String
-}
-
-model Submission {
-  id        Int      @id @default(autoincrement())
-  email     String
-  message   String
-  createdAt DateTime @default(now())
-}
-
 model Role {
   id    Int    @id @default(autoincrement())
   name  String @unique
@@ -58,4 +23,119 @@ model User {
   role         Role      @relation(fields: [roleId], references: [id])
   createdAt    DateTime  @default(now())
   deletedAt    DateTime?
+
+  inspections  Inspection[] @relation("InspectionAssignees")
+  appointments Appointment[] @relation("AppointmentAssignees")
+}
+
+model Customer {
+  id               Int      @id @default(autoincrement())
+  name             String
+  phone            String   @unique
+  address          String
+  preferredChannel String
+  createdAt        DateTime @default(now())
+
+  requests ServiceRequest[]
+}
+
+model Service {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  createdAt   DateTime @default(now())
+
+  requests ServiceRequest[]
+}
+
+model ServiceRequest {
+  id             Int      @id @default(autoincrement())
+  customerId     Int
+  customer       Customer @relation(fields: [customerId], references: [id])
+  serviceId      Int
+  service        Service  @relation(fields: [serviceId], references: [id])
+  description    String
+  location       String?
+  additionalInfo String?
+  createdAt      DateTime @default(now())
+
+  inspection     Inspection?
+  appointments   Appointment[]
+  requestType    RequestType?
+  paymentStatus  PaymentStatus?
+}
+
+model Inspection {
+  id               Int            @id @default(autoincrement())
+  serviceRequestId Int            @unique
+  serviceRequest   ServiceRequest @relation(fields: [serviceRequestId], references: [id], onDelete: Cascade)
+  scheduledDate    DateTime
+  status           String         @default("Scheduled")
+  notes            String?
+  findings         String?
+  recommendations  String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  assignees        User[]         @relation("InspectionAssignees")
+}
+
+model RequestType {
+  id               Int            @id @default(autoincrement())
+  serviceRequestId Int            @unique
+  serviceRequest   ServiceRequest @relation(fields: [serviceRequestId], references: [id], onDelete: Cascade)
+  type             String         // "Job" or "Contract"
+  durationMonths   Int?           // contract length in months (e.g. 3, 6, 12); null for jobs
+  startDate        DateTime?      // contract start; null for jobs
+  endDate          DateTime?      // contract end; null for jobs
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+}
+
+model PaymentStatus {
+  id               Int            @id @default(autoincrement())
+  serviceRequestId Int            @unique
+  serviceRequest   ServiceRequest @relation(fields: [serviceRequestId], references: [id], onDelete: Cascade)
+  status           String         @default("Not Paid") // "Paid" or "Not Paid"
+  paidAt           DateTime?      // set when the request is marked as paid
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+}
+
+model Appointment {
+  id               Int            @id @default(autoincrement())
+  serviceRequestId Int
+  serviceRequest   ServiceRequest @relation(fields: [serviceRequestId], references: [id], onDelete: Cascade)
+  scheduledAt      DateTime
+  status           String         @default("Scheduled")
+  workPerformed    String?
+  completionNotes  String?
+  customerSignOff  String?
+  signedOffAt      DateTime?
+  completedAt      DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  assignees        User[]         @relation("AppointmentAssignees")
+  changeLogs       AppointmentChangeLog[]
+}
+
+model AppointmentChangeLog {
+  id            Int         @id @default(autoincrement())
+  appointmentId Int
+  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  action        String
+  detail        String?
+  changedBy     String?
+  createdAt     DateTime    @default(now())
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  entity    String
+  entityId  Int?
+  action    String
+  detail    String?
+  changedBy String?
+  createdAt DateTime @default(now())
 }

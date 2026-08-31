@@ -38,7 +38,7 @@ const messages = {
   },
 };
 
-const AdminUsersView = ({ users, roles, searchParams, query, roleFilter }) => {
+const AdminUsersView = ({ users, roles, searchParams, query, roleFilter, canManage = true }) => {
   const created = searchParams?.created;
   const updated = searchParams?.updated;
   const deleted = searchParams?.deleted;
@@ -66,68 +66,103 @@ const AdminUsersView = ({ users, roles, searchParams, query, roleFilter }) => {
 
   return (
     <div>
-      {notice ? <Alert color={notice.color}>{notice.text}</Alert> : null}
-      <Row>
-        {/* Add User */}
-        <Col md="5">
-          <Card>
-            <CardTitle tag="h6" className="border-bottom p-3 mb-0">
-              <i className="bi bi-person-plus me-2"> </i>
-              Add New User
-            </CardTitle>
-            <CardBody>
-              <Form action={createUser} innerRef={createFormRef}>
-                <FormGroup>
-                  <Label for="firstName">First Name</Label>
-                  <Input id="firstName" name="firstName" type="text" required />
-                </FormGroup>
-                <FormGroup>
-                  <Label for="lastName">Last Name</Label>
-                  <Input id="lastName" name="lastName" type="text" required />
-                </FormGroup>
-                <FormGroup>
-                  <Label for="username">Username</Label>
-                  <Input id="username" name="username" type="text" required />
-                </FormGroup>
-                <FormGroup>
-                  <Label for="password">Password</Label>
-                  <Input
-                    id="password"
-                    name="password"
-                    type="password"
-                    required
-                  />
-                </FormGroup>
-                <FormGroup>
-                  <Label for="roleId">Role</Label>
-                  <Input id="roleId" name="roleId" type="select" required>
-                    {roles.map((role) => (
-                      <option key={role.id} value={role.id}>
-                        {role.name}
-                      </option>
-                    ))}
-                  </Input>
-                </FormGroup>
-                <Button
-                  color="primary"
-                  type="button"
-                  className="mt-2"
-                  onClick={requestCreate}
-                >
-                  Create User
-                </Button>
-              </Form>
-            </CardBody>
-          </Card>
-        </Col>
+      {/* Page header */}
+      <div className="mb-4 d-flex flex-wrap align-items-center gap-2">
+        <div>
+          <h3 className="mb-1">
+            <i className="bi bi-people me-2 text-primary" />
+            Users
+          </h3>
+          <span className="text-muted">
+            Manage staff accounts and their roles.
+          </span>
+        </div>
+        <Badge color="light" className="text-dark border ms-auto fs-6 fw-normal">
+          {users.length} total
+        </Badge>
+      </div>
 
-        {/* Users list */}
-        <Col md="7">
-          <Card>
-            <CardBody>
-              <CardTitle tag="h5">Users</CardTitle>
+      {notice ? <Alert color={notice.color}>{notice.text}</Alert> : null}
+
+      {/* Add User */}
+      {canManage ? (
+        <Card className="mb-4">
+          <CardTitle tag="h6" className="border-bottom p-3 mb-0">
+            <i className="bi bi-person-plus me-2"> </i>
+            Add New User
+          </CardTitle>
+          <CardBody>
+            <Form action={createUser} innerRef={createFormRef}>
+              <Row>
+                <Col md="6">
+                  <FormGroup>
+                    <Label for="firstName">First Name</Label>
+                    <Input id="firstName" name="firstName" type="text" required />
+                  </FormGroup>
+                </Col>
+                <Col md="6">
+                  <FormGroup>
+                    <Label for="lastName">Last Name</Label>
+                    <Input id="lastName" name="lastName" type="text" required />
+                  </FormGroup>
+                </Col>
+                <Col md="6">
+                  <FormGroup>
+                    <Label for="username">Username</Label>
+                    <Input id="username" name="username" type="text" required />
+                  </FormGroup>
+                </Col>
+                <Col md="6">
+                  <FormGroup>
+                    <Label for="password">Password</Label>
+                    <Input
+                      id="password"
+                      name="password"
+                      type="password"
+                      required
+                    />
+                  </FormGroup>
+                </Col>
+                <Col md="6">
+                  <FormGroup>
+                    <Label for="roleId">Role</Label>
+                    <Input id="roleId" name="roleId" type="select" required>
+                      {roles.map((role) => (
+                        <option key={role.id} value={role.id}>
+                          {role.name}
+                        </option>
+                      ))}
+                    </Input>
+                  </FormGroup>
+                </Col>
+              </Row>
+              <Button
+                color="primary"
+                type="button"
+                className="mt-2"
+                onClick={requestCreate}
+              >
+                Create User
+              </Button>
+            </Form>
+          </CardBody>
+        </Card>
+      ) : null}
+
+      {/* Users list */}
+      <Card>
+        <CardBody>
+              <CardTitle
+                tag="h5"
+                className="d-flex align-items-center justify-content-between"
+              >
+                <span>Staff Accounts</span>
+                <Badge color="primary" pill>
+                  {users.length}
+                </Badge>
+              </CardTitle>
               <CardSubtitle className="mb-3 text-muted" tag="h6">
-                All active users
+                Search and manage all active users
               </CardSubtitle>
 
               {/* Search & filter (plain GET form -> query params) */}
@@ -172,19 +207,23 @@ const AdminUsersView = ({ users, roles, searchParams, query, roleFilter }) => {
               </Form>
 
               <div className="table-responsive">
-                <Table className="text-nowrap mt-3 align-middle" borderless>
+                <Table className="text-nowrap mt-3 align-middle" borderless hover>
                   <thead>
                     <tr>
                       <th>Name</th>
                       <th>Username</th>
                       <th>Role</th>
-                      <th className="text-end">Actions</th>
+                      {canManage ? <th className="text-end">Actions</th> : null}
                     </tr>
                   </thead>
                   <tbody>
                     {users.length === 0 ? (
                       <tr className="border-top">
-                        <td colSpan="4" className="text-center text-muted py-3">
+                        <td colSpan={canManage ? "4" : "3"} className="text-center text-muted py-5">
+                          <i
+                            className="bi bi-person-x d-block mb-2"
+                            style={{ fontSize: "1.75rem" }}
+                          />
                           No users found.
                         </td>
                       </tr>
@@ -198,28 +237,28 @@ const AdminUsersView = ({ users, roles, searchParams, query, roleFilter }) => {
                           <td>
                             <Badge color="primary">{u.role?.name}</Badge>
                           </td>
-                          <td className="text-end">
-                            <Button
-                              tag={Link}
-                              href={`/admin/users/${u.id}/edit`}
-                              color="light"
-                              size="sm"
-                              className="me-2"
-                            >
-                              <i className="bi bi-pencil" /> Edit
-                            </Button>
-                            <DeleteUserButton user={u} />
-                          </td>
+                          {canManage ? (
+                            <td className="text-end">
+                              <Button
+                                tag={Link}
+                                href={`/admin/users/${u.id}/edit`}
+                                color="light"
+                                size="sm"
+                                className="me-2"
+                              >
+                                <i className="bi bi-pencil" /> Edit
+                              </Button>
+                              <DeleteUserButton user={u} />
+                            </td>
+                          ) : null}
                         </tr>
                       ))
                     )}
                   </tbody>
                 </Table>
               </div>
-            </CardBody>
-          </Card>
-        </Col>
-      </Row>
+        </CardBody>
+      </Card>
 
       <ConfirmModal
         isOpen={createOpen}

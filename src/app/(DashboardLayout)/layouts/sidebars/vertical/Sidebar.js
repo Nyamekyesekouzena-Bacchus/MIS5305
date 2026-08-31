@@ -4,6 +4,9 @@ import Logo from "../../shared/logo/Logo";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+// Each item lists the roles that can use it. Items without `roles` are shown to
+// everyone. Field staff never see the admin-only management pages, and only
+// management (Admin/Manager) see Reports.
 const navigation = [
   {
     title: "Dashboard",
@@ -11,55 +14,54 @@ const navigation = [
     icon: "bi bi-speedometer2",
   },
   {
-    title: "Alert",
-    href: "/ui/alerts",
-    icon: "bi bi-bell",
-  },
-  {
-    title: "Badges",
-    href: "/ui/badges",
-    icon: "bi bi-patch-check",
-  },
-  {
-    title: "Buttons",
-    href: "/ui/buttons",
-    icon: "bi bi-hdd-stack",
-  },
-  {
-    title: "Cards",
-    href: "/ui/cards",
-    icon: "bi bi-card-text",
-  },
-  {
-    title: "Grid",
-    href: "/ui/grid",
-    icon: "bi bi-columns",
-  },
-  {
-    title: "Table",
-    href: "/ui/tables",
-    icon: "bi bi-layout-split",
-  },
-  {
-    title: "Forms",
-    href: "/ui/forms",
-    icon: "bi bi-textarea-resize",
-  },
-  {
-    title: "Breadcrumbs",
-    href: "/ui/breadcrumbs",
-    icon: "bi bi-link",
-  },
-  {
-    title: "About",
-    href: "/pages/about",
+    title: "Users",
+    href: "/admin/users",
     icon: "bi bi-people",
+    roles: ["Admin", "Manager"],
+  },
+  {
+    title: "Customers",
+    href: "/admin/customers",
+    icon: "bi bi-person-vcard",
+    roles: ["Admin", "Manager"],
+  },
+  {
+    title: "Services",
+    href: "/admin/services",
+    icon: "bi bi-tools",
+    roles: ["Admin", "Manager"],
+  },
+  {
+    title: "Requests",
+    href: "/admin/requests",
+    icon: "bi bi-clipboard-check",
+    roles: ["Admin", "Manager"],
+  },
+  {
+    title: "Inspections",
+    href: "/inspections",
+    icon: "bi bi-search",
+    roles: ["Field Worker"],
+  },
+  {
+    title: "Appointments",
+    href: "/appointments",
+    icon: "bi bi-calendar-check",
+    roles: ["Field Worker"],
+  },
+  {
+    title: "Reports",
+    href: "/reports",
+    icon: "bi bi-bar-chart",
+    roles: ["Manager"],
   },
 ];
 
-const Sidebar = ({ showMobilemenu }) => {
+const Sidebar = ({ role, showMobilemenu }) => {
   const location = usePathname();
-  const currentURL = location.slice(0, location.lastIndexOf('/'));
+  const visible = navigation.filter(
+    (navi) => !navi.roles || navi.roles.includes(role)
+  );
 
   return (
     <div className="p-3">
@@ -70,44 +72,28 @@ const Sidebar = ({ showMobilemenu }) => {
           close
           size="sm"
           onClick={showMobilemenu}
+          aria-label="Close navigation menu"
         ></Button>
         </span>
       </div>
       <div className="pt-4 mt-2">
-        <Nav vertical className="sidebarNav">
-          {navigation.map((navi, index) => (
+        <Nav vertical className="sidebarNav" tag="nav" aria-label="Main navigation">
+          {visible.map((navi, index) => (
             <NavItem  key={index} className="sidenav-bg">
               <Link 
                   href={navi.href}
+                  aria-current={location === navi.href ? "page" : undefined}
                   className={
                     location === navi.href
                       ? "text-primary nav-link py-3"
                       : "nav-link text-secondary py-3"
                   }
                 >
-                  <i className={navi.icon}></i>
+                  <i className={navi.icon} aria-hidden="true"></i>
                   <span className="ms-3 d-inline-block">{navi.title}</span>
               </Link>
             </NavItem>
           ))}
-          <Button
-            color="secondary"
-            tag="a"
-            target="_blank"
-            className="mt-3"
-            href="https://www.wrappixel.com/templates/monster-next-js-free-admin-template/"
-          >
-            Download Free
-          </Button>
-          <Button
-            color="danger"
-            tag="a"
-            target="_blank"
-            className="mt-3"
-            href="https://www.wrappixel.com/templates/monster-nextjs-admin-dashboard/?ref=33"
-          >
-            Upgrade To Pro
-          </Button>
         </Nav>
       </div>
     </div>

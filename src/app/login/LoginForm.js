@@ -16,6 +16,11 @@ const LoginForm = ({ hasError }) => {
   return (
     <Card style={{ width: "100%", maxWidth: "400px" }} className="shadow">
       <CardBody className="p-4">
+        <div className="text-center mb-4">
+          <i className="bi bi-bug-fill text-primary" style={{ fontSize: "2rem" }} />
+          <h5 className="mt-2 mb-0">Miracle Exterminating</h5>
+          <small className="text-muted">Service Management System</small>
+        </div>
         <CardTitle tag="h4" className="mb-4 text-center">
           Sign In
         </CardTitle>

@@ -1,40 +1,13 @@
-'use client'
-import React from "react";
-import { Container } from "reactstrap";
-import Header from "./layouts/header/Header";
-import Sidebar from "./layouts/sidebars/vertical/Sidebar";
+import { getCurrentUser } from "@/lib/auth";
+import FullLayoutClient from "./FullLayoutClient";
 
-const FullLayout = ({ children }) => {
-  const [open, setOpen] = React.useState(false);
-  const showMobilemenu = () => {
-    setOpen(!open);
-  };
+export const dynamic = "force-dynamic";
 
-  return (
-    <main>
-      <div className="pageWrapper d-md-block d-lg-flex">
-        {/******** Sidebar **********/}
-        <aside
-          className={`sidebarArea shadow bg-white ${
-            !open ? "" : "showSidebar"
-          }`}
-        >
-          <Sidebar showMobilemenu={() => showMobilemenu()} />
-        </aside>
-        {/********Content Area**********/}
+const FullLayout = async ({ children }) => {
+  const user = await getCurrentUser();
+  const role = user?.role?.name ?? "";
 
-        <div className="contentArea">
-          {/********header**********/}
-          <Header showMobmenu={() => showMobilemenu()} />
-
-          {/********Middle Content**********/}
-          <Container className="p-4 wrapper" fluid>
-            <div>{children}</div>
-          </Container>
-        </div>
-      </div>
-    </main>
-  );
+  return <FullLayoutClient role={role}>{children}</FullLayoutClient>;
 };
 
 export default FullLayout;

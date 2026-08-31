@@ -3,3 +3,51 @@
 @import "~bootstrap-icons/font/bootstrap-icons.scss";
 @import "./layout/sidebar";
 @import "./layout/container";
+
+// Mark required fields with a red asterisk on their label.
+// Targets any label immediately followed by a required form control.
+label:has(+ input:required),
+label:has(+ select:required),
+label:has(+ textarea:required) {
+  &::after {
+    content: " *";
+    color: $danger;
+    font-weight: 600;
+  }
+}
+
+// Accessibility (RQ-08): keyboard skip link, hidden until focused.
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  z-index: 2000;
+  padding: 0.5rem 1rem;
+  background: $primary;
+  color: #fff;
+  border-radius: 0 0 0.25rem 0;
+
+  &:focus {
+    left: 0;
+  }
+}
+
+// Ensure keyboard focus is always clearly visible.
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid $primary;
+  outline-offset: 2px;
+}
+
+// Visually-hidden helper for screen-reader-only text.
+.visually-hidden-focusable:not(:focus):not(:focus-within) {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}

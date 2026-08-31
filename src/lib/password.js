@@ -1,11 +1,3 @@
-import bcrypt from "bcryptjs";
-
-const SALT_ROUNDS = 10;
-
-export async function hashPassword(plainPassword) {
-  return bcrypt.hash(plainPassword, SALT_ROUNDS);
-}
-
-export async function verifyPassword(plainPassword, passwordHash) {
-  return bcrypt.compare(plainPassword, passwordHash);
-}
+// Re-exported from password.mjs so the same implementation is used by the app
+// (via webpack) and by the Node test runner (which imports the .mjs directly).
+export { hashPassword, verifyPassword } from "./password.mjs";

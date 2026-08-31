@@ -84,3 +84,19 @@ export async function requireAdmin() {
   if (user.role?.name !== "Admin") redirect("/");
   return user;
 }
+
+export const MANAGEMENT_ROLES = ["Admin", "Manager"];
+
+// Reporting and other management functions are limited to management personnel.
+export async function requireManagement() {
+  const user = await requireUser();
+  if (!MANAGEMENT_ROLES.includes(user.role?.name)) redirect("/");
+  return user;
+}
+
+// Operational reports are reserved for the Managing Director (Manager) only.
+export async function requireManager() {
+  const user = await requireUser();
+  if (user.role?.name !== "Manager") redirect("/");
+  return user;
+}

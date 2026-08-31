@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { hashPassword } from "@/lib/password";
 import { requireAdmin, getCurrentUser } from "@/lib/auth";
+import { recordAudit } from "@/lib/audit";
 
 // Usernames are globally unique (including soft-deleted users), so a deleted
 // account can be reactivated later without a username collision.
@@ -20,7 +21,7 @@ async function usernameTaken(username, excludeId) {
 }
 
 export async function createUser(formData) {
-  await requireAdmin();
+  const actor = await requireAdmin();
 
   const firstName = String(formData.get("firstName") ?? "").trim();
   const lastName = String(formData.get("lastName") ?? "").trim();
@@ -37,8 +38,16 @@ export async function createUser(formData) {
   }
 
   const passwordHash = await hashPassword(password);
-  await db.user.create({
+  const created = await db.user.create({
     data: { firstName, lastName, username, passwordHash, roleId },
+  });
+
+  await recordAudit({
+    entity: "User",
+    entityId: created.id,
+    action: "Created",
+    detail: `Created user "${username}".`,
+    user: actor,
   });
 
   revalidatePath("/admin/users");
@@ -46,7 +55,7 @@ export async function createUser(formData) {
 }
 
 export async function updateUser(formData) {
-  await requireAdmin();
+  const actor = await requireAdmin();
 
   const id = Number(formData.get("id"));
   const firstName = String(formData.get("firstName") ?? "").trim();
@@ -67,12 +76,20 @@ export async function updateUser(formData) {
     data: { firstName, lastName, username, roleId },
   });
 
+  await recordAudit({
+    entity: "User",
+    entityId: id,
+    action: "Updated",
+    detail: `Updated user "${username}".`,
+    user: actor,
+  });
+
   revalidatePath("/admin/users");
   redirect("/admin/users?updated=1");
 }
 
 export async function softDeleteUser(formData) {
-  await requireAdmin();
+  const actor = await requireAdmin();
 
   const id = Number(formData.get("id"));
   if (!id) {
@@ -88,6 +105,14 @@ export async function softDeleteUser(formData) {
   await db.user.update({
     where: { id },
     data: { deletedAt: new Date() },
+  });
+
+  await recordAudit({
+    entity: "User",
+    entityId: id,
+    action: "Deactivated",
+    detail: `Deactivated user #${id}.`,
+    user: actor,
   });
 
   revalidatePath("/admin/users");

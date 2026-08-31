@@ -4,17 +4,13 @@ import Image from "next/image";
 import {
   Navbar,
   Collapse,
-  Nav,
-  NavItem,
   NavbarBrand,
-  UncontrolledDropdown,
   DropdownToggle,
   DropdownMenu,
   DropdownItem,
   Dropdown,
   Button,
 } from "reactstrap";
-import LogoWhite from "public/images/logos/monsterlogo.svg";
 import Logoicon from "public/images/logos/monsterlogowhite.svg";
 import user1 from "public/images/users/user1.jpg";
 import { logout } from "@/actions/auth";
@@ -34,8 +30,13 @@ const Header = ({ showMobmenu }) => {
         <NavbarBrand href="/" className="d-lg-none">
           <Image src={Logoicon} alt="logo" />
         </NavbarBrand>
-        <Button color="primary" className="d-lg-none" onClick={showMobmenu}>
-          <i className="bi bi-list"></i>
+        <Button
+          color="primary"
+          className="d-lg-none"
+          onClick={showMobmenu}
+          aria-label="Toggle navigation menu"
+        >
+          <i className="bi bi-list" aria-hidden="true"></i>
         </Button>
       </div>
       <div className="hstack gap-2">
@@ -44,46 +45,20 @@ const Header = ({ showMobmenu }) => {
           size="sm"
           className="d-sm-block d-md-none"
           onClick={Handletoggle}
+          aria-label={isOpen ? "Close menu" : "Open menu"}
+          aria-expanded={isOpen}
         >
           {isOpen ? (
-            <i className="bi bi-x"></i>
+            <i className="bi bi-x" aria-hidden="true"></i>
           ) : (
-            <i className="bi bi-three-dots-vertical"></i>
+            <i className="bi bi-three-dots-vertical" aria-hidden="true"></i>
           )}
         </Button>
       </div>
 
       <Collapse navbar isOpen={isOpen}>
-        <Nav className="me-auto" navbar>
-          <NavItem>
-            <Link href="/" className="nav-link">
-              Starter
-            </Link>
-          </NavItem>
-          <NavItem>
-            <Link href="/pages/about"  className="nav-link">
-             About
-            </Link>
-          </NavItem>
-          <NavItem>
-            <Link href="/admin/users" className="nav-link">
-              User Management
-            </Link>
-          </NavItem>
-          <UncontrolledDropdown inNavbar nav>
-            <DropdownToggle caret nav>
-              DD Menu
-            </DropdownToggle>
-            <DropdownMenu end>
-              <DropdownItem>Option 1</DropdownItem>
-              <DropdownItem>Option 2</DropdownItem>
-              <DropdownItem divider />
-              <DropdownItem>Reset</DropdownItem>
-            </DropdownMenu>
-          </UncontrolledDropdown>
-        </Nav>
         <Dropdown isOpen={dropdownOpen} toggle={toggle}>
-          <DropdownToggle color="primary">
+          <DropdownToggle color="primary" aria-label="Account menu">
             <div style={{ lineHeight: "0px" }}>
               <Image
                 src={user1}
@@ -95,19 +70,13 @@ const Header = ({ showMobmenu }) => {
             </div>
           </DropdownToggle>
           <DropdownMenu>
-            <DropdownItem header>Info</DropdownItem>
             <DropdownItem tag={Link} href="/account">
               My Account
             </DropdownItem>
             <DropdownItem divider />
-            <DropdownItem>My Balance</DropdownItem>
-            <DropdownItem>Inbox</DropdownItem>
-            <DropdownItem divider />
-            <form action={logout}>
-              <DropdownItem tag="button" type="submit">
-                Logout
-              </DropdownItem>
-            </form>
+            <DropdownItem tag="button" type="button" onClick={() => logout()}>
+              Logout
+            </DropdownItem>
           </DropdownMenu>
         </Dropdown>
       </Collapse>

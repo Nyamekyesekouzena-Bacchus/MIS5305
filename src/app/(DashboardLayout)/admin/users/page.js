@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { requireAdmin } from "@/lib/auth";
+import { requireManagement } from "@/lib/auth";
 import AdminUsersView from "./AdminUsersView";
 
 export const dynamic = "force-dynamic";
@@ -9,7 +9,8 @@ export const metadata = {
 };
 
 export default async function AdminUsersPage({ searchParams }) {
-  await requireAdmin();
+  const user = await requireManagement();
+  const canManage = user.role?.name === "Admin";
 
   const q = String(searchParams?.q ?? "").trim();
   const roleFilter = String(searchParams?.role ?? "all");
@@ -42,6 +43,7 @@ export default async function AdminUsersPage({ searchParams }) {
       searchParams={searchParams}
       query={q}
       roleFilter={roleFilter}
+      canManage={canManage}
     />
   );
 }
