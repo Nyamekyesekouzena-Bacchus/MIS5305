@@ -1,0 +1,41 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: miracle-exterminating-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: mis
+      POSTGRES_PASSWORD: mis_password
+      POSTGRES_DB: mis5305
+    ports:
+      # Host 5433 -> container 5432 (5433 avoids clashing with any local Postgres)
+      - "5433:5432"
+    volumes:
+      - miracle_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mis -d mis5305"]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+
+  # Full application container. Only starts when you opt in with:
+  #   docker compose --profile app up
+  # Use this when the machine does NOT have Node.js installed.
+  app:
+    build: .
+    container_name: miracle-exterminating-app
+    profiles: ["app"]
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Talk to the db service over the internal Docker network (container port 5432).
+      DATABASE_URL: "postgresql://mis:mis_password@db:5432/mis5305?schema=public"
+      AUTH_SECRET: "docker-dev-secret-change-me-in-production"
+    ports:
+      - "3000:3000"
+    # Apply the schema and seed data (db is healthy by now), then start the app.
+    command: sh -c "npx prisma db push && npx prisma db seed && npx next dev -H 0.0.0.0 -p 3000"
+
+volumes:
+  miracle_pgdata:

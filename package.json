@@ -3,11 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "predev": "node scripts/setup.mjs",
     "dev": "next dev",
+    "prebuild": "node scripts/setup.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "test": "node --test tests/",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:reset": "docker compose down -v && node scripts/setup.mjs",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "prisma db seed"
