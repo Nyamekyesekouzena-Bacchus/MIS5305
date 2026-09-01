@@ -11,6 +11,8 @@
     "start": "next start",
     "lint": "next lint",
     "test": "node --test tests/",
+    "docs:pdf": "node scripts/md2pdf.mjs",
+    "evidence": "node scripts/build-evidence.mjs",
     "db:up": "docker compose up -d",
     "db:down": "docker compose down",
     "db:reset": "docker compose down -v && node scripts/setup.mjs",

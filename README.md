@@ -86,6 +86,69 @@ When it finishes, open <http://localhost:3000>.
 | `npm run db:reset`  | **Destroys** the database volume and re-seeds from scratch |
 | `npm run db:seed`   | Re-runs the seed script                                    |
 | `npm test`          | Runs the unit tests                                        |
+| `npm run docs:pdf`  | Generates the evidence PDFs from the docs Markdown         |
+| `npm run evidence`  | **Full pipeline:** runs tests, writes live results into the report, and rebuilds all PDFs |
+
+---
+
+## Testing and evidence (Section 3)
+
+The prototype has an automated **unit-test** suite covering the centralised
+business rules and validation (the acceptance-level rules behind FR-001…007,
+payment tracking, and NFR-004). Run it with:
+
+```bash
+npm test
+```
+
+This runs Node's built-in test runner over [`tests/rules.test.mjs`](tests/rules.test.mjs)
+and prints a pass/fail summary (currently **13 pass, 0 fail**).
+
+### Formative-evaluation reports
+
+The Section-3 evidence is written in Markdown under [`docs/`](docs/):
+
+| Report | Markdown | PDF |
+| --- | --- | --- |
+| Test evidence & traceability | [`docs/test-evidence.md`](docs/test-evidence.md) | `docs/test-evidence.pdf` |
+| Heuristic evaluation | [`docs/heuristic-evaluation.md`](docs/heuristic-evaluation.md) | `docs/heuristic-evaluation.pdf` |
+| Task-based usability testing | [`docs/usability-testing.md`](docs/usability-testing.md) | `docs/usability-testing.pdf` |
+
+### Generating the PDFs
+
+The PDFs are produced from the Markdown as part of the testing/evaluation cycle.
+
+**Recommended — one command does everything:**
+
+```bash
+npm run evidence
+```
+
+This runs [`scripts/build-evidence.mjs`](scripts/build-evidence.mjs), which:
+
+1. Runs the full unit-test suite.
+2. Writes the **live** results (pass/fail per test + summary) into the
+   auto-generated block of [`docs/test-evidence.md`](docs/test-evidence.md).
+3. Rebuilds all three PDFs (`docs/*.pdf`) with the updated results.
+
+It exits non-zero if any test fails, so the PDFs always reflect the real run.
+
+**Manual alternative** — run the tests, then build the PDFs separately:
+
+```bash
+npm test          # run the unit tests
+npm run docs:pdf  # regenerate docs/*.pdf from the Markdown
+```
+
+`npm run docs:pdf` runs [`scripts/md2pdf.mjs`](scripts/md2pdf.mjs), which renders
+each report with `wkhtmltopdf`. It requires `wkhtmltopdf` to be installed:
+
+```bash
+brew install --cask wkhtmltopdf   # macOS
+```
+
+> `npm test` on its own only runs the tests — it does **not** create the PDFs.
+> Use `npm run evidence` for the full automated pipeline.
 
 ---
 
