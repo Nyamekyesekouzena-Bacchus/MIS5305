@@ -25,6 +25,7 @@ import {
   validateRequestType,
   contractEndDate,
   validatePaymentStatus,
+  scheduleWindow,
 } from "../src/lib/validation.mjs";
 import { hashPassword, verifyPassword } from "../src/lib/password.mjs";
 
@@ -56,9 +57,34 @@ test("parseScheduledAt rejects empty, invalid and past datetimes", () => {
   assert.ok(ok.date instanceof Date);
 });
 
+test("parseScheduledAt rejects an earlier time on the same day", () => {
+  // NOW is 2025-06-15T12:00 — an earlier time today must be rejected.
+  assert.deepEqual(parseScheduledAt("2025-06-15T09:00", NOW), { error: "past" });
+  // A later time today is allowed.
+  const later = parseScheduledAt("2025-06-15T15:00", NOW);
+  assert.ok(later.date instanceof Date);
+  // The current minute is still allowed even though NOW carries seconds.
+  const nowWithSeconds = new Date("2025-06-15T12:00:30");
+  const current = parseScheduledAt("2025-06-15T12:00", nowWithSeconds);
+  assert.ok(current.date instanceof Date);
+});
+
 test("parseAssigneeIds keeps only positive integers", () => {
   assert.deepEqual(parseAssigneeIds(["1", "2", "x", "-3", "0"]), [1, 2]);
   assert.deepEqual(parseAssigneeIds(undefined), []);
+});
+
+test("scheduleWindow brackets a time by the given window (minutes)", () => {
+  const at = new Date("2025-06-15T12:00:00");
+  const { start, end } = scheduleWindow(at, 120);
+  assert.equal(start.toISOString(), new Date("2025-06-15T10:00:00").toISOString());
+  assert.equal(end.toISOString(), new Date("2025-06-15T14:00:00").toISOString());
+  // A booking one hour away falls inside a 120-minute window (a clash)...
+  const near = new Date("2025-06-15T13:00:00");
+  assert.ok(near >= start && near <= end);
+  // ...while one three hours away falls outside it (no clash).
+  const far = new Date("2025-06-15T15:30:00");
+  assert.ok(far > end);
 });
 
 test("isInspectionDone reflects submitted/completed only", () => {

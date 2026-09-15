@@ -31,6 +31,17 @@ export async function createInspection(formData) {
     redirect(`/admin/requests/${serviceRequestId}?inspection=exists`);
   }
 
+  // Technician availability: no assignee may already be booked for another
+  // inspection on the same date.
+  const clash = await db.inspection.findFirst({
+    where: {
+      scheduledDate: parsed.date,
+      assignees: { some: { id: { in: assigneeIds } } },
+    },
+    select: { id: true },
+  });
+  if (clash) redirect(`${base}?error=conflict`);
+
   await db.inspection.create({
     data: {
       serviceRequestId,
@@ -56,6 +67,18 @@ export async function updateInspection(formData) {
   if (!id || !serviceRequestId) redirect(`/admin/requests`);
   if (parsed.error) redirect(`${base}?error=${parsed.error}`);
   if (assigneeIds.length === 0) redirect(`${base}?error=assignees`);
+
+  // Technician availability: no assignee may already be booked for a different
+  // inspection on the same date.
+  const clash = await db.inspection.findFirst({
+    where: {
+      id: { not: id },
+      scheduledDate: parsed.date,
+      assignees: { some: { id: { in: assigneeIds } } },
+    },
+    select: { id: true },
+  });
+  if (clash) redirect(`${base}?error=conflict`);
 
   await db.inspection.update({
     where: { id },

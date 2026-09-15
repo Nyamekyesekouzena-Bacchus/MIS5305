@@ -23,6 +23,8 @@ const errors = {
   invalid: "That date/time is not valid.",
   past: "The appointment cannot be scheduled in the past.",
   assignees: "Please assign at least one field worker.",
+  conflict:
+    "One or more selected field workers are already booked for another appointment around that time.",
 };
 
 const EditAppointmentForm = ({

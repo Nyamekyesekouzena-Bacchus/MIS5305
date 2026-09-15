@@ -8,6 +8,7 @@ import {
   parseAssigneeIds,
   canScheduleAppointment,
   canCompleteJob,
+  scheduleWindow,
 } from "@/lib/validation.mjs";
 
 // Human-readable name for the acting user, used in the change log.
@@ -43,6 +44,18 @@ export async function createAppointment(formData) {
     redirect(`/admin/requests/${serviceRequestId}?appointment=${gate.reason}`);
   }
 
+  // Technician availability: no assignee may already be booked for another
+  // appointment within the scheduling window of this date/time.
+  const window = scheduleWindow(parsed.date);
+  const clash = await db.appointment.findFirst({
+    where: {
+      scheduledAt: { gte: window.start, lte: window.end },
+      assignees: { some: { id: { in: assigneeIds } } },
+    },
+    select: { id: true },
+  });
+  if (clash) redirect(`${base}?error=conflict`);
+
   await db.appointment.create({
     data: {
       serviceRequestId,
@@ -75,6 +88,19 @@ export async function updateAppointment(formData) {
   if (!id || !serviceRequestId) redirect(`/admin/requests`);
   if (parsed.error) redirect(`${base}?error=${parsed.error}`);
   if (assigneeIds.length === 0) redirect(`${base}?error=assignees`);
+
+  // Technician availability: no assignee may already be booked for a different
+  // appointment within the scheduling window of this date/time.
+  const window = scheduleWindow(parsed.date);
+  const clash = await db.appointment.findFirst({
+    where: {
+      id: { not: id },
+      scheduledAt: { gte: window.start, lte: window.end },
+      assignees: { some: { id: { in: assigneeIds } } },
+    },
+    select: { id: true },
+  });
+  if (clash) redirect(`${base}?error=conflict`);
 
   // Capture the previous state so we can log exactly what changed.
   const previous = await db.appointment.findUnique({

@@ -45,6 +45,12 @@ export const PAYMENT_STATUS_COLORS = {
 // Valid contract durations offered in the UI (months).
 export const CONTRACT_DURATIONS = [3, 6, 9, 12, 18, 24];
 
+// Assumed length of an appointment (minutes). Two appointments assigned to the
+// same field worker within this window of each other are treated as a clash,
+// so the technician-availability check uses a time window rather than an
+// exact-minute match.
+export const APPOINTMENT_WINDOW_MINUTES = 120;
+
 // Bootstrap colour mapping for status badges.
 export const STATUS_COLORS = {
   [INSPECTION_STATUS.SCHEDULED]: "secondary",

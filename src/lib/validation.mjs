@@ -7,6 +7,7 @@ import {
   REQUEST_TYPE,
   CONTRACT_DURATIONS,
   PAYMENT_STATUSES,
+  APPOINTMENT_WINDOW_MINUTES,
 } from "./status.mjs";
 
 // Parse a "YYYY-MM-DD" date string; must be valid and not in the past.
@@ -23,14 +24,18 @@ export function parseScheduledDate(value, now = new Date()) {
 }
 
 // Parse a "YYYY-MM-DDTHH:mm" datetime-local string; must be valid, not past.
+// Because this carries a time-of-day, it is compared against the current
+// moment (not midnight) so an earlier time on the same day is rejected.
 export function parseScheduledAt(value, now = new Date()) {
   if (!value) return { error: "missing" };
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return { error: "invalid" };
 
-  const startOfToday = new Date(now);
-  startOfToday.setHours(0, 0, 0, 0);
-  if (date < startOfToday) return { error: "past" };
+  // Truncate "now" to the start of the current minute so selecting the current
+  // minute is still allowed (datetime-local has minute precision).
+  const cutoff = new Date(now);
+  cutoff.setSeconds(0, 0);
+  if (date < cutoff) return { error: "past" };
 
   return { date };
 }
@@ -40,6 +45,17 @@ export function parseAssigneeIds(values) {
   return (values ?? [])
     .map((v) => Number(v))
     .filter((n) => Number.isInteger(n) && n > 0);
+}
+
+// Half-open time window [start, end] centred on an appointment's start time,
+// used by the technician-availability check so a clash is any other booking
+// within `windowMinutes` on either side (rather than an exact-minute match).
+export function scheduleWindow(date, windowMinutes = APPOINTMENT_WINDOW_MINUTES) {
+  const ms = windowMinutes * 60 * 1000;
+  return {
+    start: new Date(date.getTime() - ms),
+    end: new Date(date.getTime() + ms),
+  };
 }
 
 // An inspection is "done" once submitted or completed.

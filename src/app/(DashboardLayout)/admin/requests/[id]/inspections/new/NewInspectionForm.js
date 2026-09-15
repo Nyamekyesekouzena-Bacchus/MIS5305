@@ -23,6 +23,8 @@ const errors = {
   invalid: "That date is not valid.",
   past: "The inspection date cannot be in the past.",
   assignees: "Please assign at least one field worker.",
+  conflict:
+    "One or more selected field workers are already booked for another inspection on that date.",
 };
 
 const NewInspectionForm = ({ request, fieldWorkers, minDate, searchParams }) => {
