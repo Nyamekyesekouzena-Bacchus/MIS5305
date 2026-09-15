@@ -11,6 +11,7 @@ import {
   Alert,
 } from "reactstrap";
 import { login } from "@/actions/auth";
+import PasswordInput from "@/components/PasswordInput";
 
 const LoginForm = ({ hasError }) => {
   return (
@@ -40,11 +41,10 @@ const LoginForm = ({ hasError }) => {
           </FormGroup>
           <FormGroup>
             <Label for="password">Password</Label>
-            <Input
+            <PasswordInput
               id="password"
               name="password"
               placeholder="Enter your password"
-              type="password"
               required
             />
           </FormGroup>

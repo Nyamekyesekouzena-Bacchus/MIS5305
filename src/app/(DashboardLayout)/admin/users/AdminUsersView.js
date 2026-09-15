@@ -20,6 +20,7 @@ import {
 import { createUser } from "@/actions/admin";
 import ConfirmModal from "../../components/ConfirmModal";
 import DeleteUserButton from "./DeleteUserButton";
+import PasswordInput from "@/components/PasswordInput";
 
 const messages = {
   created: {
@@ -115,10 +116,9 @@ const AdminUsersView = ({ users, roles, searchParams, query, roleFilter, canMana
                 <Col md="6">
                   <FormGroup>
                     <Label for="password">Password</Label>
-                    <Input
+                    <PasswordInput
                       id="password"
                       name="password"
-                      type="password"
                       required
                     />
                   </FormGroup>

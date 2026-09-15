@@ -12,13 +12,13 @@ import {
   Form,
   FormGroup,
   Label,
-  Input,
   Button,
   Alert,
   FormText,
 } from "reactstrap";
 import { changePassword } from "@/actions/account";
 import ConfirmModal from "../components/ConfirmModal";
+import PasswordInput from "@/components/PasswordInput";
 
 const messages = {
   changed: { color: "success", text: "Your password has been updated." },
@@ -111,20 +111,18 @@ const AccountView = ({ user, searchParams }) => {
             <Form action={changePassword} innerRef={formRef}>
               <FormGroup>
                 <Label for="newPassword">New Password</Label>
-                <Input
+                <PasswordInput
                   id="newPassword"
                   name="newPassword"
-                  type="password"
                   required
                 />
                 <FormText>Must be at least 6 characters long.</FormText>
               </FormGroup>
               <FormGroup>
                 <Label for="confirmPassword">Confirm New Password</Label>
-                <Input
+                <PasswordInput
                   id="confirmPassword"
                   name="confirmPassword"
-                  type="password"
                   required
                 />
               </FormGroup>
