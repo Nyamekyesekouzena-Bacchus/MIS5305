@@ -9,6 +9,12 @@ export const metadata = {
   title: "Schedule Inspection",
 };
 
+function localMin() {
+  const d = new Date();
+  const off = d.getTimezoneOffset();
+  return new Date(d.getTime() - off * 60000).toISOString().slice(0, 16);
+}
+
 export default async function NewInspectionPage({ params, searchParams }) {
   await requireAdmin();
 
@@ -32,9 +38,6 @@ export default async function NewInspectionPage({ params, searchParams }) {
     orderBy: [{ firstName: "asc" }, { lastName: "asc" }],
   });
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
   return (
     <NewInspectionForm
       request={{
@@ -47,7 +50,7 @@ export default async function NewInspectionPage({ params, searchParams }) {
         name: `${u.firstName} ${u.lastName}`,
         username: u.username,
       }))}
-      minDate={today.toISOString().slice(0, 10)}
+      minDate={localMin()}
       searchParams={searchParams}
     />
   );

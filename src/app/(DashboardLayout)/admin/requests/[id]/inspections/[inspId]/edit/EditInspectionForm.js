@@ -19,12 +19,12 @@ import { updateInspection } from "@/actions/inspection";
 import ConfirmModal from "@/app/(DashboardLayout)/components/ConfirmModal";
 
 const errors = {
-  missing: "Please choose an inspection date.",
-  invalid: "That date is not valid.",
-  past: "The inspection date cannot be in the past.",
+  missing: "Please choose an inspection date and time.",
+  invalid: "That date/time is not valid.",
+  past: "The inspection cannot be scheduled in the past.",
   assignees: "Please assign at least one field worker.",
   conflict:
-    "One or more selected field workers are already booked for another inspection on that date.",
+    "One or more selected field workers are already booked for another inspection around that time.",
 };
 
 const EditInspectionForm = ({
@@ -78,11 +78,11 @@ const EditInspectionForm = ({
                 value={inspection.serviceRequestId}
               />
               <FormGroup>
-                <Label for="scheduledDate">Inspection Date</Label>
+                <Label for="scheduledDate">Inspection Date &amp; Time</Label>
                 <Input
                   id="scheduledDate"
                   name="scheduledDate"
-                  type="date"
+                  type="datetime-local"
                   min={minDate}
                   defaultValue={inspection.scheduledDate}
                   required

@@ -266,7 +266,7 @@ const DashboardView = ({
                       <tr key={i.id} className="border-top">
                         <td>
                           <Link href={inspectionLink(i)}>
-                            {new Date(i.scheduledDate).toLocaleDateString()}
+                            {new Date(i.scheduledDate).toLocaleString()}
                           </Link>
                           {i.overdue ? (
                             <Badge color="danger" className="ms-2">
@@ -378,7 +378,7 @@ const DashboardView = ({
                         </td>
                         <td>
                           <Link href={inspectionLink(i)}>
-                            {new Date(i.scheduledDate).toLocaleDateString()}
+                            {new Date(i.scheduledDate).toLocaleString()}
                           </Link>
                         </td>
                         <td>{i.customerName || "-"}</td>

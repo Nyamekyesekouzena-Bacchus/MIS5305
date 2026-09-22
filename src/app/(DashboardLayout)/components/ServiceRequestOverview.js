@@ -255,7 +255,7 @@ const ServiceRequestOverview = ({
             <Table borderless className="align-middle mb-0">
               <tbody>
                 <InfoRow label="Scheduled Date">
-                  {new Date(inspection.scheduledDate).toLocaleDateString()}
+                  {new Date(inspection.scheduledDate).toLocaleString()}
                 </InfoRow>
                 <InfoRow label="Status">
                   <Badge color={statusColors[inspection.status] || "secondary"}>

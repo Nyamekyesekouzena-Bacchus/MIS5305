@@ -50,7 +50,7 @@ const InspectionsListView = ({ userName, inspections }) => {
                       <tr key={ins.id} className="border-top">
                         <td>{ins.id}</td>
                         <td>
-                          {new Date(ins.scheduledDate).toLocaleDateString()}
+                          {new Date(ins.scheduledDate).toLocaleString()}
                         </td>
                         <td>{ins.customerName}</td>
                         <td>

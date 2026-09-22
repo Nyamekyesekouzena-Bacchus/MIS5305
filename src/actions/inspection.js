@@ -4,9 +4,10 @@ import { db } from "@/lib/db";
 import { requireAdmin, requireUser } from "@/lib/auth";
 import { INSPECTION_STATUS } from "@/lib/status.mjs";
 import {
-  parseScheduledDate,
+  parseScheduledAt,
   parseAssigneeIds,
   canSubmitInspection,
+  scheduleWindow,
 } from "@/lib/validation.mjs";
 
 export async function createInspection(formData) {
@@ -17,7 +18,7 @@ export async function createInspection(formData) {
   const assigneeIds = parseAssigneeIds(formData.getAll("assigneeIds"));
 
   const base = `/admin/requests/${serviceRequestId}/inspections/new`;
-  const parsed = parseScheduledDate(dateValue);
+  const parsed = parseScheduledAt(dateValue);
   if (!serviceRequestId) redirect(`/admin/requests`);
   if (parsed.error) redirect(`${base}?error=${parsed.error}`);
   if (assigneeIds.length === 0) redirect(`${base}?error=assignees`);
@@ -32,10 +33,11 @@ export async function createInspection(formData) {
   }
 
   // Technician availability: no assignee may already be booked for another
-  // inspection on the same date.
+  // inspection within the scheduling window of this date/time.
+  const window = scheduleWindow(parsed.date);
   const clash = await db.inspection.findFirst({
     where: {
-      scheduledDate: parsed.date,
+      scheduledDate: { gte: window.start, lte: window.end },
       assignees: { some: { id: { in: assigneeIds } } },
     },
     select: { id: true },
@@ -63,17 +65,18 @@ export async function updateInspection(formData) {
   const assigneeIds = parseAssigneeIds(formData.getAll("assigneeIds"));
 
   const base = `/admin/requests/${serviceRequestId}/inspections/${id}/edit`;
-  const parsed = parseScheduledDate(dateValue);
+  const parsed = parseScheduledAt(dateValue);
   if (!id || !serviceRequestId) redirect(`/admin/requests`);
   if (parsed.error) redirect(`${base}?error=${parsed.error}`);
   if (assigneeIds.length === 0) redirect(`${base}?error=assignees`);
 
   // Technician availability: no assignee may already be booked for a different
-  // inspection on the same date.
+  // inspection within the scheduling window of this date/time.
+  const window = scheduleWindow(parsed.date);
   const clash = await db.inspection.findFirst({
     where: {
       id: { not: id },
-      scheduledDate: parsed.date,
+      scheduledDate: { gte: window.start, lte: window.end },
       assignees: { some: { id: { in: assigneeIds } } },
     },
     select: { id: true },

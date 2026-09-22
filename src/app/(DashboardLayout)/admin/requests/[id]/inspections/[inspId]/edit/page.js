@@ -9,6 +9,17 @@ export const metadata = {
   title: "Edit Inspection",
 };
 
+function localMin() {
+  const d = new Date();
+  const off = d.getTimezoneOffset();
+  return new Date(d.getTime() - off * 60000).toISOString().slice(0, 16);
+}
+
+function toLocalInput(date) {
+  const off = date.getTimezoneOffset();
+  return new Date(date.getTime() - off * 60000).toISOString().slice(0, 16);
+}
+
 export default async function EditInspectionPage({ params, searchParams }) {
   await requireAdmin();
 
@@ -32,9 +43,6 @@ export default async function EditInspectionPage({ params, searchParams }) {
     orderBy: [{ firstName: "asc" }, { lastName: "asc" }],
   });
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
   const assignedIds = inspection.assignees.map((a) => a.id);
 
   return (
@@ -42,7 +50,7 @@ export default async function EditInspectionPage({ params, searchParams }) {
       inspection={{
         id: inspection.id,
         serviceRequestId: inspection.serviceRequestId,
-        scheduledDate: inspection.scheduledDate.toISOString().slice(0, 10),
+        scheduledDate: toLocalInput(inspection.scheduledDate),
         customerName: inspection.serviceRequest?.customer?.name ?? "",
         serviceName: inspection.serviceRequest?.service?.name ?? "",
       }}
@@ -52,7 +60,7 @@ export default async function EditInspectionPage({ params, searchParams }) {
         username: u.username,
         assigned: assignedIds.includes(u.id),
       }))}
-      minDate={today.toISOString().slice(0, 10)}
+      minDate={localMin()}
       searchParams={searchParams}
     />
   );

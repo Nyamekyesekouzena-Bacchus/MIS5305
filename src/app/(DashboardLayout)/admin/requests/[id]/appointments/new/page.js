@@ -11,7 +11,6 @@ export const metadata = {
 
 function localMin() {
   const d = new Date();
-  d.setHours(0, 0, 0, 0);
   const off = d.getTimezoneOffset();
   return new Date(d.getTime() - off * 60000).toISOString().slice(0, 16);
 }
